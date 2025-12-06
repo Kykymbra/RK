@@ -1,0 +1,2819 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoteExpress - Создание и управление опросами</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2575fc;
+            --secondary-color: #6a11cb;
+            --text-color: #333;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --header-bg: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            --footer-color: #333;
+            --danger-color: #dc3545;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+        }
+
+        .dark-theme {
+            --primary-color: #4d8eff;
+            --secondary-color: #8a2be2;
+            --text-color: #f0f0f0;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --header-bg: linear-gradient(135deg, #1a0638 0%, #0c2b6c 100%);
+            --footer-color: #f0f0f0;
+            --danger-color: #ff6b6b;
+            --success-color: #51cf66;
+            --warning-color: #ffd43b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        body {
+            background: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            color: white;
+            background: var(--header-bg);
+            border-radius: 15px;
+            padding: 15px 25px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo-icon::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent 30%, rgba(255, 255, 255, 0.2) 70%);
+            transform: rotate(45deg);
+        }
+
+        .logo-icon i {
+            font-size: 20px;
+            color: white;
+            z-index: 1;
+        }
+        
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1;
+        }
+
+        .logo-text span:first-child {
+            font-weight: 800;
+            font-size: 22px;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text span:last-child {
+            font-size: 10px;
+            opacity: 0.8;
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: background 0.3s;
+        }
+        
+        nav a:hover, nav a.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            cursor: pointer;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 30px;
+        }
+        
+        .sidebar {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            height: fit-content;
+        }
+        
+        .sidebar h2 {
+            margin-bottom: 20px;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sidebar ul {
+            list-style: none;
+        }
+        
+        .sidebar li {
+            margin-bottom: 15px;
+        }
+        
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+        
+        .sidebar a:hover, .sidebar a.active {
+            background: rgba(37, 117, 252, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .content {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .content h1 {
+            color: var(--text-color);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #e9ecef;
+            color: #495057;
+        }
+        
+        .btn-secondary:hover {
+            background: #dee2e6;
+        }
+        
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            color: #212529;
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background: #138496;
+        }
+        
+        .polls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .poll-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+        }
+
+        .dark-theme .poll-card {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .poll-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .poll-card h3 {
+            margin-bottom: 15px;
+            color: var(--text-color);
+        }
+        
+        .poll-card p {
+            color: var(--text-color);
+            opacity: 0.8;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .poll-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-color);
+            opacity: 0.7;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+        
+        .poll-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        
+        .create-poll-form {
+            background: rgba(0, 0, 0, 0.03);
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .dark-theme .create-poll-form {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            background: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        .dark-theme .form-control {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 117, 252, 0.2);
+        }
+        
+        .option-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .option-input input {
+            flex: 1;
+        }
+        
+        .add-option {
+            background: var(--success-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        
+        .poll-results {
+            margin-top: 30px;
+        }
+        
+        .result-item {
+            margin-bottom: 15px;
+        }
+        
+        .result-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .progress {
+            height: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .dark-theme .progress {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: var(--primary-color);
+            border-radius: 5px;
+        }
+        
+        /* Стили для прохождения опроса */
+        .poll-view {
+            background: rgba(0, 0, 0, 0.03);
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .dark-theme .poll-view {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .poll-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .dark-theme .poll-option {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .poll-option:hover {
+            background: rgba(37, 117, 252, 0.1);
+        }
+        
+        .poll-option.selected {
+            background: rgba(37, 117, 252, 0.2);
+            border-color: var(--primary-color);
+        }
+        
+        .poll-option input {
+            margin-right: 10px;
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+        
+        .poll-option-text {
+            margin-left: 30px;
+        }
+        
+        .custom-checkbox {
+            position: absolute;
+            left: 12px;
+            height: 20px;
+            width: 20px;
+            background-color: var(--card-bg);
+            border: 2px solid var(--text-color);
+            border-radius: 4px;
+        }
+        
+        .poll-option input:checked ~ .custom-checkbox {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .custom-checkbox:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+        
+        .poll-option input:checked ~ .custom-checkbox:after {
+            display: block;
+            left: 6px;
+            top: 2px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+        
+        .custom-radio {
+            position: absolute;
+            left: 12px;
+            height: 20px;
+            width: 20px;
+            background-color: var(--card-bg);
+            border: 2px solid var(--text-color);
+            border-radius: 50%;
+        }
+        
+        .poll-option input:checked ~ .custom-radio {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .custom-radio:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+        
+        .poll-option input:checked ~ .custom-radio:after {
+            display: block;
+            left: 5px;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: white;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .close {
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+        
+        .auth-form {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .theme-switcher {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .history-item {
+            padding: 15px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dark-theme .history-item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .poll-result-summary {
+            text-align: center;
+            padding: 20px;
+            background: rgba(37, 117, 252, 0.1);
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .poll-result-summary h3 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .user-management {
+            margin-top: 30px;
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .user-table th, .user-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-theme .user-table th, 
+        .dark-theme .user-table td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .user-table th {
+            background-color: rgba(0, 0, 0, 0.05);
+            font-weight: 600;
+        }
+
+        .dark-theme .user-table th {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .role-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .role-admin {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .role-user {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .avatar-upload {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .avatar-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary-color);
+        }
+
+        .avatar-upload-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.3s;
+        }
+
+        .avatar-upload-btn:hover {
+            background: var(--secondary-color);
+        }
+
+        #avatarFile {
+            display: none;
+        }
+
+        .clear-history-btn {
+            margin-top: 20px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: var(--footer-color);
+            padding: 20px;
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        .my-polls-filter {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .filter-btn {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f8f9fa;
+            color: #495057;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .filter-btn:hover {
+            background: #e9ecef;
+        }
+        
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .poll-creator {
+            font-size: 12px;
+            color: var(--primary-color);
+            margin-top: 5px;
+        }
+        
+        .poll-option-percentage {
+            font-size: 12px;
+            color: var(--text-color);
+            opacity: 0.7;
+            margin-left: auto;
+        }
+        
+        .poll-result-view {
+            margin-top: 30px;
+        }
+        
+        .poll-result-item {
+            margin-bottom: 15px;
+        }
+        
+        .poll-result-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .poll-result-percentage {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* Новые стили для прохождения опроса на главной */
+        .poll-vote-modal {
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .poll-vote-options {
+            margin: 20px 0;
+        }
+
+        .vote-confirmation {
+            text-align: center;
+            padding: 20px;
+            background: rgba(37, 117, 252, 0.1);
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .polls-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .avatar-upload {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .my-polls-filter {
+                flex-direction: column;
+            }
+
+            .logo {
+                flex-direction: column;
+                text-align: center;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="logo-text">
+                    <span>VoteExpress</span>
+                    <span>POLL SYSTEM</span>
+                </div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#" class="active" data-nav="home">Главная</a></li>
+                    <li><a href="#" data-nav="completed-polls">Пройденные опросы</a></li>
+                    <li><a href="#" data-nav="take-poll">Пройти опрос</a></li>
+                    <li><a href="#" data-nav="history">История</a></li>
+                    <li id="admin-nav-item" style="display: none;"><a href="#" data-nav="admin">Админ-панель</a></li>
+                </ul>
+            </nav>
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar" title="Нажмите для изменения аватара">U</div>
+                <span id="userName">Пользователь</span>
+                <button class="btn btn-sm btn-secondary" id="logoutBtn" style="display: none;">Выйти</button>
+                <button class="btn btn-sm btn-info" id="loginFromGuestBtn" style="display: none;">Войти</button>
+                <button class="btn btn-sm btn-warning" id="guestModeBtn" style="display: none;">Гостевой режим</button>
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <div class="sidebar">
+                <h2><i class="fas fa-tachometer-alt"></i> Панель управления</h2>
+                <ul>
+                    <li><a href="#" class="active" data-section="overview"><i class="fas fa-home"></i> Обзор</a></li>
+                    <li><a href="#" data-section="create-poll"><i class="fas fa-plus-circle"></i> Создать опрос</a></li>
+                    <li><a href="#" data-section="user-profile"><i class="fas fa-user"></i> Профиль</a></li>
+                    <li><a href="#" data-section="settings"><i class="fas fa-cog"></i> Настройки</a></li>
+                    <li id="admin-side-item" style="display: none;"><a href="#" data-section="admin"><i class="fas fa-shield-alt"></i> Админ-панель</a></li>
+                </ul>
+            </div>
+            
+            <div class="content">
+                <div class="content-header">
+                    <h1><i class="fas fa-poll-h"></i> <span id="content-title">Обзор опросов</span></h1>
+                </div>
+                
+                <!-- Обзор опросов -->
+                <div id="overview-section">
+                    <h2>Доступные опросы</h2>
+                    <div class="polls-grid" id="polls-container">
+                        <!-- Опросы будут добавляться динамически -->
+                    </div>
+                </div>
+                
+                <!-- Пройденные опросы -->
+                <div id="completed-polls-section" style="display: none;">
+                    <h2><i class="fas fa-poll"></i> Пройденные опросы</h2>
+                    <div class="my-polls-filter">
+                        <button class="filter-btn active" id="showAllPollsBtn">Все опросы</button>
+                        <button class="filter-btn" id="showMyPollsBtn">Созданные мной</button>
+                    </div>
+                    <div class="polls-grid" id="my-polls-container">
+                        <!-- Пройденные опросы будут добавляться динамически -->
+                    </div>
+                </div>
+                
+                <!-- Создание опроса -->
+                <div id="create-poll-section" style="display: none;">
+                    <div class="create-poll-form">
+                        <h2><i class="fas fa-plus-circle"></i> Создание нового опроса</h2>
+                        
+                        <div class="form-group">
+                            <label for="pollTitle">Название опроса</label>
+                            <input type="text" class="form-control" id="pollTitle" placeholder="Введите название опроса">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="pollDescription">Описание опроса</label>
+                            <textarea class="form-control" id="pollDescription" rows="3" placeholder="Введите описание опроса"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Варианты ответов</label>
+                            <div id="poll-options">
+                                <div class="option-input">
+                                    <input type="text" class="form-control option-input-field" placeholder="Вариант ответа">
+                                    <button class="btn btn-danger btn-sm remove-option-btn"><i class="fas fa-times"></i></button>
+                                </div>
+                                <div class="option-input">
+                                    <input type="text" class="form-control option-input-field" placeholder="Вариант ответа">
+                                    <button class="btn btn-danger btn-sm remove-option-btn"><i class="fas fa-times"></i></button>
+                                </div>
+                            </div>
+                            <button class="btn btn-success" id="addOptionBtn"><i class="fas fa-plus"></i> Добавить вариант</button>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="pollSettings">Настройки опроса</label>
+                            <select class="form-control" id="pollSettings">
+                                <option value="single">Только один вариант</option>
+                                <option value="multiple">Выбор нескольких вариантов</option>
+                                <option value="anonymous">Анонимный опрос</option>
+                            </select>
+                        </div>
+                        
+                        <button class="btn btn-primary" id="savePollBtn">Создать опрос</button>
+                        <button class="btn btn-secondary" id="cancelPollBtn">Отмена</button>
+                    </div>
+                </div>
+                
+                <!-- Прохождение опроса -->
+                <div id="take-poll-section" style="display: none;">
+                    <h2>Доступные опросы</h2>
+                    <div class="polls-grid" id="available-polls">
+                        <!-- Доступные опросы будут добавляться динамически -->
+                    </div>
+                    
+                    <div id="poll-view" class="poll-view" style="display: none;">
+                        <h2 id="poll-view-title"></h2>
+                        <p id="poll-view-description"></p>
+                        
+                        <div id="poll-options-container"></div>
+                        
+                        <button class="btn btn-primary" id="submitPollBtn" style="margin-top: 20px;">Отправить ответ</button>
+                        <button class="btn btn-secondary" id="backToPollsBtn">Назад к опросам</button>
+                    </div>
+
+                    <div id="poll-result" class="poll-result-summary" style="display: none;">
+                        <h3><i class="fas fa-check-circle"></i> Спасибо за ваш ответ!</h3>
+                        <p>Ваш голос был учтен. Вы можете просмотреть результаты этого опроса в разделе "История".</p>
+                        <button class="btn btn-primary" id="backAfterVoteBtn">Вернуться к списку опросов</button>
+                    </div>
+                </div>
+                
+                <!-- История опросов -->
+                <div id="history-section" style="display: none;">
+                    <h2><i class="fas fa-history"></i> История ваших действий</h2>
+                    <div id="history-list">
+                        <!-- История будет добавляться динамически -->
+                    </div>
+                    <button class="btn btn-danger clear-history-btn" id="clearHistoryBtn"><i class="fas fa-trash"></i> Очистить историю</button>
+                </div>
+
+                <!-- Настройки -->
+                <div id="settings-section" style="display: none;">
+                    <h2><i class="fas fa-cog"></i> Настройки</h2>
+                    
+                    <div class="form-group">
+                        <label>Тема оформления</label>
+                        <div class="theme-switcher">
+                            <span>Светлая тема</span>
+                            <label class="switch">
+                                <input type="checkbox" id="themeSwitch">
+                                <span class="slider"></span>
+                            </label>
+                            <span>Тёмная тема</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notifications">Уведомления</label>
+                        <div>
+                            <input type="checkbox" id="emailNotifications" checked>
+                            <label for="emailNotifications">Email-уведомления</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="browserNotifications" checked>
+                            <label for="browserNotifications">Браузерные уведомления</label>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" id="saveSettingsBtn">Сохранить настройки</button>
+                </div>
+
+                <!-- Личный кабинет -->
+                <div id="profile-section" style="display: none;">
+                    <h2><i class="fas fa-user"></i> Личный кабинет</h2>
+                    
+                    <div class="form-group">
+                        <label for="userNameInput">Имя пользователя</label>
+                        <input type="text" class="form-control" id="userNameInput" value="Пользователь">
+                        <div class="error-message" id="nameError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="userEmail">Email</label>
+                        <input type="email" class="form-control" id="userEmail" value="user@example.com" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Аватар</label>
+                        <div class="avatar-upload">
+                            <img id="avatarPreview" class="avatar-preview" src="" alt="Аватар">
+                            <div>
+                                <label for="avatarFile" class="avatar-upload-btn">Загрузить аватар</label>
+                                <input type="file" id="avatarFile" accept="image/*">
+                                <p style="font-size: 12px; margin-top: 5px; color: #666;">Рекомендуемый размер: 200x200 px</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-top: 30px;">Статистика</h3>
+                    <div class="poll-results">
+                        <div class="result-item">
+                            <div class="result-label">
+                                <span>Создано опросов</span>
+                                <span id="createdPollsCount">0</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-label">
+                                <span>Пройдено опросов</span>
+                                <span id="completedPollsCount">0</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" id="saveProfileBtn">Сохранить изменения</button>
+                </div>
+
+                <!-- Админ-панель -->
+                <div id="admin-section" style="display: none;">
+                    <h2><i class="fas fa-shield-alt"></i> Админ-панель</h2>
+                    
+                    <div class="user-management">
+                        <h3>Управление пользователями</h3>
+                        <table class="user-table">
+                            <thead>
+                                <tr>
+                                    <th>Имя</th>
+                                    <th>Email</th>
+                                    <th>Роль</th>
+                                    <th>Дата регистрации</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table-body">
+                                <!-- Пользователи будут добавляться динамически -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно авторизации -->
+        <div id="loginModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Вход в систему</h3>
+                    <span class="close">&times;</span>
+                </div>
+                <div class="auth-form">
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" class="form-control" id="loginEmail" placeholder="Введите ваш email">
+                        <div class="error-message" id="loginEmailError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Пароль</label>
+                        <input type="password" class="form-control" id="loginPassword" placeholder="Введите пароль">
+                    </div>
+                    <button class="btn btn-primary" id="loginBtn" style="width: 100%;">Войти</button>
+                    <button class="btn btn-warning" id="guestLoginBtn" style="width: 100%; margin-top: 10px;">Войти как гость</button>
+                    <p style="text-align: center; margin-top: 15px;">
+                        Нет аккаунта? <a href="#" id="showRegisterBtn">Зарегистрироваться</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно регистрации -->
+        <div id="registerModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Регистрация</h3>
+                    <span class="close">&times;</span>
+                </div>
+                <div class="auth-form">
+                    <div class="form-group">
+                        <label for="registerName">Имя пользователя</label>
+                        <input type="text" class="form-control" id="registerName" placeholder="Введите ваше имя">
+                        <div class="error-message" id="registerNameError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerEmail">Email</label>
+                        <input type="email" class="form-control" id="registerEmail" placeholder="Введите ваш email">
+                        <div class="error-message" id="registerEmailError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPassword">Пароль</label>
+                        <input type="password" class="form-control" id="registerPassword" placeholder="Придумайте пароль">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPasswordConfirm">Подтверждение пароля</label>
+                        <input type="password" class="form-control" id="registerPasswordConfirm" placeholder="Повторите пароль">
+                        <div class="error-message" id="registerPasswordError"></div>
+                    </div>
+                    <button class="btn btn-primary" id="registerBtn" style="width: 100%;">Зарегистрироваться</button>
+                    <p style="text-align: center; margin-top: 15px;">
+                        Уже есть аккаунт? <a href="#" id="showLoginBtn">Войти</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 VoteExpress - Система для создания и управления опросами. Все права защищены.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Хранение данных
+        let polls = JSON.parse(localStorage.getItem('polls')) || [];
+        let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        let currentPollId = null;
+        let currentView = 'overview';
+        let history = JSON.parse(localStorage.getItem('history')) || [];
+        let myPollsFilter = 'all'; // 'all' или 'my'
+        
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            // Загрузка тестовых данных, если нет сохраненных
+            if (polls.length === 0) {
+                loadSamplePolls();
+            }
+            
+            if (users.length === 0) {
+                loadSampleUsers();
+            }
+            
+            // Проверка авторизации - НЕ показываем форму регистрации при обновлении
+            if (!currentUser) {
+                updateUserInfo();
+                renderPolls();
+                renderAvailablePolls();
+            } else {
+                updateUserInfo();
+                renderPolls();
+                renderAvailablePolls();
+            }
+            
+            setupEventListeners();
+            loadSettings();
+        });
+        
+        // Загрузка примеров опросов
+        function loadSamplePolls() {
+            polls = [
+                {
+                    id: 1,
+                    title: 'Какая тема для следующего вебинара вам интересна?',
+                    description: 'Опрос для определения наиболее интересной темы для проведения вебинара в следующем месяце.',
+                    options: [
+                        { text: 'Веб-разработка', votes: 15 },
+                        { text: 'Мобильная разработка', votes: 12 },
+                        { text: 'Дизайн интерфейсов', votes: 8 },
+                        { text: 'Data Science', votes: 10 }
+                    ],
+                    date: '12.10.2023',
+                    totalVotes: 45,
+                    type: 'single',
+                    creator: 'admin@example.com',
+                    creatorName: 'Администратор'
+                },
+                {
+                    id: 2,
+                    title: 'Оцените качество нашего сервиса',
+                    description: 'Пожалуйста, оцените качество обслуживания в нашем центре поддержки клиентов.',
+                    options: [
+                        { text: 'Отлично', votes: 25 },
+                        { text: 'Хорошо', votes: 15 },
+                        { text: 'Удовлетворительно', votes: 5 },
+                        { text: 'Плохо', votes: 2 }
+                    ],
+                    date: '05.10.2023',
+                    totalVotes: 47,
+                    type: 'single',
+                    creator: 'admin@example.com',
+                    creatorName: 'Администратор'
+                },
+                {
+                    id: 3,
+                    title: 'Какой формат обучения вам больше нравится?',
+                    description: 'Выберите предпочитаемый формат обучения для наших курсов.',
+                    options: [
+                        { text: 'Видеоуроки', votes: 0 },
+                        { text: 'Текстовые материалы', votes: 0 },
+                        { text: 'Интерактивные задания', votes: 0 },
+                        { text: 'Вебинары в реальном времени', votes: 0 }
+                    ],
+                    date: '15.10.2023',
+                    totalVotes: 0,
+                    type: 'multiple',
+                    creator: 'user@example.com',
+                    creatorName: 'Пользователь'
+                }
+            ];
+            savePolls();
+        }
+        
+        // Загрузка примеров пользователей
+        function loadSampleUsers() {
+            users = [
+                {
+                    id: 1,
+                    name: 'Администратор',
+                    email: 'admin@example.com',
+                    password: 'admin123',
+                    role: 'admin',
+                    avatar: 'A',
+                    avatarImage: '',
+                    registrationDate: '01.01.2023'
+                },
+                {
+                    id: 2,
+                    name: 'Пользователь',
+                    email: 'user@example.com',
+                    password: 'user123',
+                    role: 'user',
+                    avatar: 'U',
+                    avatarImage: '',
+                    registrationDate: '01.01.2023'
+                }
+            ];
+            localStorage.setItem('users', JSON.stringify(users));
+        }
+        
+        // Сохранение опросов в localStorage
+        function savePolls() {
+            localStorage.setItem('polls', JSON.stringify(polls));
+        }
+        
+        // Сохранение истории
+        function saveHistory() {
+            localStorage.setItem('history', JSON.stringify(history));
+        }
+        
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            // Навигация вверху
+            document.querySelectorAll('nav a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const section = this.getAttribute('data-nav');
+                    showSection(section);
+                });
+            });
+            
+            // Навигация в боковой панели
+            document.querySelectorAll('.sidebar a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const section = this.getAttribute('data-section');
+                    showSection(section);
+                });
+            });
+            
+            // Кнопка отмены создания опроса
+            document.getElementById('cancelPollBtn').addEventListener('click', function() {
+                showSection('overview');
+            });
+            
+            // Добавление варианта ответа
+            document.getElementById('addOptionBtn').addEventListener('click', function() {
+                const optionsContainer = document.getElementById('poll-options');
+                const newOption = document.createElement('div');
+                newOption.className = 'option-input';
+                newOption.innerHTML = `
+                    <input type="text" class="form-control option-input-field" placeholder="Вариант ответа">
+                    <button class="btn btn-danger btn-sm remove-option-btn"><i class="fas fa-times"></i></button>
+                `;
+                optionsContainer.appendChild(newOption);
+                
+                // Добавляем обработчик для кнопки удаления
+                newOption.querySelector('.remove-option-btn').addEventListener('click', function() {
+                    newOption.remove();
+                });
+            });
+            
+            // Удаление вариантов ответа
+            document.querySelectorAll('.remove-option-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.parentElement.remove();
+                });
+            });
+            
+            // Сохранение опроса
+            document.getElementById('savePollBtn').addEventListener('click', function() {
+                createNewPoll();
+            });
+            
+            // Кнопка "Назад" при прохождении опроса
+            document.getElementById('backToPollsBtn').addEventListener('click', function() {
+                document.getElementById('poll-view').style.display = 'none';
+                document.getElementById('available-polls').style.display = 'grid';
+                document.getElementById('poll-result').style.display = 'none';
+            });
+            
+            // Кнопка "Назад" после голосования
+            document.getElementById('backAfterVoteBtn').addEventListener('click', function() {
+                document.getElementById('poll-result').style.display = 'none';
+                document.getElementById('available-polls').style.display = 'grid';
+            });
+            
+            // Отправка ответа на опрос
+            document.getElementById('submitPollBtn').addEventListener('click', function() {
+                submitPollResponse();
+            });
+            
+            // Переключение модальных окон авторизации
+            document.getElementById('showRegisterBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('loginModal').style.display = 'none';
+                document.getElementById('registerModal').style.display = 'flex';
+            });
+            
+            document.getElementById('showLoginBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('registerModal').style.display = 'none';
+                document.getElementById('loginModal').style.display = 'flex';
+            });
+            
+            // Закрытие модальных окон
+            document.querySelectorAll('.close').forEach(closeBtn => {
+                closeBtn.addEventListener('click', function() {
+                    document.getElementById('loginModal').style.display = 'none';
+                    document.getElementById('registerModal').style.display = 'none';
+                });
+            });
+            
+            // Кнопки авторизации
+            document.getElementById('loginBtn').addEventListener('click', function() {
+                loginUser();
+            });
+            
+            document.getElementById('registerBtn').addEventListener('click', function() {
+                registerUser();
+            });
+
+            // Кнопка гостевого входа
+            document.getElementById('guestLoginBtn').addEventListener('click', function() {
+                enterAsGuest();
+            });
+
+            // Кнопка входа из гостевого режима
+            document.getElementById('loginFromGuestBtn').addEventListener('click', function() {
+                document.getElementById('loginModal').style.display = 'flex';
+            });
+
+            // Кнопка переключения в гостевой режим
+            document.getElementById('guestModeBtn').addEventListener('click', function() {
+                enterAsGuest();
+            });
+            
+            // Кнопка выхода
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                logoutUser();
+            });
+            
+            // Сохранение настроек
+            document.getElementById('saveSettingsBtn').addEventListener('click', function() {
+                saveSettings();
+            });
+            
+            // Сохранение профиля
+            document.getElementById('saveProfileBtn').addEventListener('click', function() {
+                saveProfile();
+            });
+            
+            // Загрузка аватара
+            document.getElementById('avatarFile').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('avatarPreview').src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Клик по аватару для загрузки
+            document.getElementById('userAvatar').addEventListener('click', function() {
+                if (currentUser && !currentUser.isGuest) {
+                    showSection('user-profile');
+                }
+            });
+            
+            // Фильтры для "Пройденных опросов"
+            document.getElementById('showAllPollsBtn').addEventListener('click', function() {
+                myPollsFilter = 'all';
+                updateFilterButtons();
+                renderMyPolls();
+            });
+            
+            document.getElementById('showMyPollsBtn').addEventListener('click', function() {
+                myPollsFilter = 'my';
+                updateFilterButtons();
+                renderMyPolls();
+            });
+            
+            // Переключение темы
+            document.getElementById('themeSwitch').addEventListener('change', function() {
+                toggleTheme();
+            });
+            
+            // Очистка истории
+            document.getElementById('clearHistoryBtn').addEventListener('click', function() {
+                if (confirm('Вы уверены, что хотите очистить всю историю? Это действие нельзя отменить.')) {
+                    history = [];
+                    saveHistory();
+                    renderHistory();
+                    alert('История очищена!');
+                }
+            });
+        }
+        
+        // Обновление состояния кнопок фильтра
+        function updateFilterButtons() {
+            const allBtn = document.getElementById('showAllPollsBtn');
+            const myBtn = document.getElementById('showMyPollsBtn');
+            
+            allBtn.classList.remove('active');
+            myBtn.classList.remove('active');
+            
+            if (myPollsFilter === 'all') {
+                allBtn.classList.add('active');
+            } else {
+                myBtn.classList.add('active');
+            }
+        }
+        
+        // Вход в гостевом режиме
+        function enterAsGuest() {
+            currentUser = {
+                id: 0,
+                email: 'guest@example.com',
+                name: 'Гость',
+                avatar: 'G',
+                role: 'guest',
+                isGuest: true,
+                avatarImage: ''
+            };
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            document.getElementById('loginModal').style.display = 'none';
+            updateUserInfo();
+            renderPolls();
+            renderAvailablePolls();
+            
+            // Добавление в историю
+            history.unshift({
+                user: currentUser.email,
+                type: 'login',
+                description: `Гость вошел в систему`,
+                date: new Date().toLocaleString('ru-RU'),
+                userName: currentUser.name
+            });
+            saveHistory();
+            
+            alert('Добро пожаловать в гостевом режиме! Вы можете проходить опросы, но не можете создавать их.');
+        }
+        
+        // Показать определенный раздел
+        function showSection(section) {
+            if (!currentUser && section !== 'take-poll') {
+                document.getElementById('loginModal').style.display = 'flex';
+                return;
+            }
+            
+            // Скрыть все разделы
+            document.getElementById('overview-section').style.display = 'none';
+            document.getElementById('completed-polls-section').style.display = 'none';
+            document.getElementById('create-poll-section').style.display = 'none';
+            document.getElementById('take-poll-section').style.display = 'none';
+            document.getElementById('history-section').style.display = 'none';
+            document.getElementById('settings-section').style.display = 'none';
+            document.getElementById('profile-section').style.display = 'none';
+            document.getElementById('admin-section').style.display = 'none';
+            
+            // Показать выбранный раздел
+            switch(section) {
+                case 'overview':
+                case 'home':
+                    document.getElementById('overview-section').style.display = 'block';
+                    document.getElementById('content-title').textContent = 'Обзор опросов';
+                    renderPolls();
+                    break;
+                case 'completed-polls':
+                    document.getElementById('completed-polls-section').style.display = 'block';
+                    document.getElementById('content-title').textContent = 'Пройденные опросы';
+                    updateFilterButtons();
+                    renderMyPolls();
+                    break;
+                case 'create-poll':
+                    if (currentUser && currentUser.isGuest) {
+                        alert('Гости не могут создавать опросы. Пожалуйста, зарегистрируйтесь.');
+                        showSection('overview');
+                        return;
+                    }
+                    document.getElementById('create-poll-section').style.display = 'block';
+                    document.getElementById('content-title').textContent = 'Создание опроса';
+                    break;
+                case 'take-poll':
+                    document.getElementById('take-poll-section').style.display = 'block';
+                    document.getElementById('content-title').textContent = 'Пройти опрос';
+                    renderAvailablePolls();
+                    break;
+                case 'history':
+                    document.getElementById('history-section').style.display = 'block';
+                    document.getElementById('content-title').textContent = 'История действий';
+                    renderHistory();
+                    break;
+                case 'settings':
+                    document.getElementById('settings-section').style.display = 'block';
+                    document.getElementById('content-title').textContent = 'Настройки';
+                    break;
+                case 'user-profile':
+                    if (currentUser && currentUser.isGuest) {
+                        alert('Гости не могут редактировать профиль. Пожалуйста, зарегистрируйтесь.');
+                        showSection('overview');
+                        return;
+                    }
+                    document.getElementById('profile-section').style.display = 'block';
+                    document.getElementById('content-title').textContent = 'Личный кабинет';
+                    loadProfileData();
+                    break;
+                case 'admin':
+                    if (currentUser && currentUser.role === 'admin') {
+                        document.getElementById('admin-section').style.display = 'block';
+                        document.getElementById('content-title').textContent = 'Админ-панель';
+                        renderUsersTable();
+                    }
+                    break;
+            }
+            
+            currentView = section;
+            
+            // Обновить активные ссылки в навигации
+            document.querySelectorAll('nav a').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('data-nav') === section) {
+                    link.classList.add('active');
+                }
+            });
+            
+            document.querySelectorAll('.sidebar a').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('data-section') === section) {
+                    link.classList.add('active');
+                }
+            });
+        }
+        
+        // Отображение опросов на главной
+        function renderPolls() {
+            const pollsContainer = document.getElementById('polls-container');
+            pollsContainer.innerHTML = '';
+            
+            if (polls.length === 0) {
+                pollsContainer.innerHTML = '<p>Нет доступных опросов.</p>';
+                return;
+            }
+            
+            polls.forEach(poll => {
+                const pollCard = document.createElement('div');
+                pollCard.className = 'poll-card';
+                pollCard.innerHTML = `
+                    <h3>${poll.title}</h3>
+                    <p>${poll.description}</p>
+                    <div class="poll-creator">Создатель: ${poll.creatorName || poll.creator}</div>
+                    <div class="poll-meta">
+                        <span><i class="fas fa-calendar"></i> ${poll.date}</span>
+                        <span><i class="fas fa-vote-yea"></i> ${poll.totalVotes || 0} голосов</span>
+                    </div>
+                    <div class="poll-actions">
+                        <button class="btn btn-sm btn-primary take-poll-btn" data-id="${poll.id}">Пройти опрос</button>
+                        <button class="btn btn-sm btn-info view-poll-results-btn" data-id="${poll.id}">Результаты</button>
+                    </div>
+                `;
+                pollsContainer.appendChild(pollCard);
+            });
+            
+            // Добавление обработчиков для кнопок
+            document.querySelectorAll('.take-poll-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const pollId = parseInt(this.getAttribute('data-id'));
+                    // Используем новую функцию для прохождения опроса на главной
+                    takePollFromMain(pollId);
+                });
+            });
+            
+            // Добавление обработчиков для кнопок просмотра результатов
+            document.querySelectorAll('.view-poll-results-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const pollId = parseInt(this.getAttribute('data-id'));
+                    showPollResults(pollId);
+                });
+            });
+        }
+
+        // Новая функция: прохождение опроса с главной страницы
+        function takePollFromMain(pollId) {
+            const poll = polls.find(p => p.id === pollId);
+            if (!poll) return;
+            
+            // Создаем модальное окно для прохождения опроса
+            const modalId = 'vote-modal-' + poll.id;
+            let modal = document.getElementById(modalId);
+            
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = modalId;
+                modal.className = 'modal';
+                modal.style.display = 'flex';
+                
+                modal.innerHTML = `
+                    <div class="modal-content poll-vote-modal">
+                        <div class="modal-header">
+                            <h3>${poll.title}</h3>
+                            <span class="close">&times;</span>
+                        </div>
+                        <p style="margin-bottom: 15px; opacity: 0.8;">${poll.description}</p>
+                        <div class="poll-vote-options" id="vote-options-${poll.id}"></div>
+                        <div class="vote-confirmation" id="vote-confirm-${poll.id}" style="display: none;">
+                            <h4><i class="fas fa-check-circle"></i> Ваш голос принят!</h4>
+                            <p>Спасибо за участие в опросе.</p>
+                            <button class="btn btn-primary close-vote-modal-btn" style="margin-top: 10px;">Закрыть</button>
+                        </div>
+                        <button class="btn btn-primary" id="submit-vote-btn-${poll.id}" style="width: 100%; margin-top: 20px;">Проголосовать</button>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                // Добавляем обработчики для закрытия
+                modal.querySelector('.close').addEventListener('click', function() {
+                    modal.style.display = 'none';
+                });
+                
+                // Закрытие по клику на фон
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+                
+                // Обработчик кнопки закрытия после голосования
+                modal.querySelector('.close-vote-modal-btn')?.addEventListener('click', function() {
+                    modal.style.display = 'none';
+                });
+                
+                // Отображаем варианты ответа
+                const optionsContainer = document.getElementById(`vote-options-${poll.id}`);
+                renderVoteOptions(poll, optionsContainer);
+                
+                // Обработчик кнопки голосования
+                document.getElementById(`submit-vote-btn-${poll.id}`).addEventListener('click', function() {
+                    submitVoteFromMain(pollId, modal);
+                });
+            } else {
+                modal.style.display = 'flex';
+            }
+        }
+
+        // Отображение вариантов для голосования в модальном окне
+        function renderVoteOptions(poll, container) {
+            container.innerHTML = '';
+            
+            poll.options.forEach((option, index) => {
+                const optionElement = document.createElement('label');
+                optionElement.className = 'poll-option';
+                
+                if (poll.type === 'multiple') {
+                    optionElement.innerHTML = `
+                        <input type="checkbox" id="vote-option-${poll.id}-${index}" name="vote-option-${poll.id}" value="${index}">
+                        <span class="custom-checkbox"></span>
+                        <span class="poll-option-text">${option.text}</span>
+                    `;
+                } else {
+                    optionElement.innerHTML = `
+                        <input type="radio" id="vote-option-${poll.id}-${index}" name="vote-option-${poll.id}" value="${index}">
+                        <span class="custom-radio"></span>
+                        <span class="poll-option-text">${option.text}</span>
+                    `;
+                }
+                
+                // Добавляем обработчик клика на всю область варианта
+                optionElement.addEventListener('click', function(e) {
+                    const input = this.querySelector('input');
+                    if (poll.type === 'multiple') {
+                        input.checked = !input.checked;
+                        this.classList.toggle('selected', input.checked);
+                    } else {
+                        // Для радио-кнопок убираем выделение у всех
+                        document.querySelectorAll(`input[name="vote-option-${poll.id}"]`).forEach(inp => {
+                            inp.parentElement.classList.remove('selected');
+                        });
+                        input.checked = true;
+                        this.classList.add('selected');
+                    }
+                    
+                    input.dispatchEvent(new Event('change'));
+                });
+                
+                container.appendChild(optionElement);
+            });
+        }
+
+        // Отправка голоса из модального окна на главной
+        function submitVoteFromMain(pollId, modal) {
+            const poll = polls.find(p => p.id === pollId);
+            if (!poll) return;
+            
+            const selectedOptions = [];
+            
+            if (poll.type === 'multiple') {
+                document.querySelectorAll(`input[name="vote-option-${poll.id}"]:checked`).forEach(checkbox => {
+                    selectedOptions.push(parseInt(checkbox.value));
+                });
+            } else {
+                const selected = document.querySelector(`input[name="vote-option-${poll.id}"]:checked`);
+                if (selected) {
+                    selectedOptions.push(parseInt(selected.value));
+                }
+            }
+            
+            if (selectedOptions.length === 0) {
+                alert('Пожалуйста, выберите хотя бы один вариант ответа');
+                return;
+            }
+            
+            // Обновление результатов
+            selectedOptions.forEach(index => {
+                poll.options[index].votes++;
+            });
+            
+            poll.totalVotes = poll.options.reduce((sum, option) => sum + option.votes, 0);
+            savePolls();
+            
+            // Добавление в историю
+            history.unshift({
+                user: currentUser ? currentUser.email : 'Гость',
+                type: 'vote',
+                description: `Пройден опрос: "${poll.title}"`,
+                date: new Date().toLocaleString('ru-RU'),
+                userName: currentUser ? currentUser.name : 'Гость'
+            });
+            saveHistory();
+            
+            // Показываем подтверждение
+            const optionsContainer = document.getElementById(`vote-options-${poll.id}`);
+            const confirmContainer = document.getElementById(`vote-confirm-${poll.id}`);
+            const submitBtn = document.getElementById(`submit-vote-btn-${poll.id}`);
+            
+            optionsContainer.style.display = 'none';
+            submitBtn.style.display = 'none';
+            confirmContainer.style.display = 'block';
+            
+            // Обновляем опросы на главной
+            setTimeout(() => {
+                renderPolls();
+            }, 500);
+        }
+        
+        // Отображение "Пройденных опросов"
+        function renderMyPolls() {
+            const myPollsContainer = document.getElementById('my-polls-container');
+            myPollsContainer.innerHTML = '';
+            
+            let filteredPolls = polls;
+            
+            if (currentUser && myPollsFilter === 'my' && !currentUser.isGuest) {
+                filteredPolls = polls.filter(poll => poll.creator === currentUser.email);
+            }
+            
+            if (filteredPolls.length === 0) {
+                if (myPollsFilter === 'my') {
+                    myPollsContainer.innerHTML = '<p>Вы еще не создали ни одного опроса.</p>';
+                } else {
+                    myPollsContainer.innerHTML = '<p>Нет доступных опросов.</p>';
+                }
+                return;
+            }
+            
+            filteredPolls.forEach(poll => {
+                const pollCard = document.createElement('div');
+                pollCard.className = 'poll-card';
+                pollCard.innerHTML = `
+                    <h3>${poll.title}</h3>
+                    <p>${poll.description}</p>
+                    <div class="poll-creator">Создатель: ${poll.creatorName || poll.creator}</div>
+                    <div class="poll-meta">
+                        <span><i class="fas fa-calendar"></i> ${poll.date}</span>
+                        <span><i class="fas fa-vote-yea"></i> ${poll.totalVotes || 0} голосов</span>
+                    </div>
+                    <div class="poll-actions">
+                        <button class="btn btn-sm btn-primary view-poll-results-btn" data-id="${poll.id}">Посмотреть результаты</button>
+                        ${poll.creator === currentUser.email ? `
+                            <button class="btn btn-sm btn-danger delete-poll-btn" data-id="${poll.id}">Удалить</button>
+                        ` : ''}
+                    </div>
+                `;
+                myPollsContainer.appendChild(pollCard);
+            });
+            
+            // Добавление обработчиков для кнопок просмотра результатов
+            document.querySelectorAll('.view-poll-results-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const pollId = parseInt(this.getAttribute('data-id'));
+                    showPollResults(pollId);
+                });
+            });
+            
+            // Добавление обработчиков для кнопок удаления
+            document.querySelectorAll('.delete-poll-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const pollId = parseInt(this.getAttribute('data-id'));
+                    if (confirm('Вы уверены, что хотите удалить этот опрос? Это действие нельзя отменить.')) {
+                        deletePoll(pollId);
+                    }
+                });
+            });
+        }
+        
+        // Показать результаты опроса
+        function showPollResults(pollId) {
+            const poll = polls.find(p => p.id === pollId);
+            if (!poll) return;
+            
+            // Остаемся в текущем разделе, а не переходим в "Пройти опрос"
+            if (currentView === 'overview' || currentView === 'home') {
+                // Создаем модальное окно для просмотра результатов
+                showResultsInModal(poll);
+            } else if (currentView === 'completed-polls') {
+                // Показываем результаты в текущем разделе
+                showResultsInCurrentSection(poll);
+            }
+        }
+        
+        // Показать результаты в модальном окне
+        function showResultsInModal(poll) {
+            // Создаем модальное окно для результатов
+            const modalId = 'results-modal-' + poll.id;
+            let modal = document.getElementById(modalId);
+            
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = modalId;
+                modal.className = 'modal';
+                modal.style.display = 'flex';
+                
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>${poll.title} - Результаты</h3>
+                            <span class="close">&times;</span>
+                        </div>
+                        <div style="max-height: 400px; overflow-y: auto;">
+                            <p style="margin-bottom: 15px; opacity: 0.8;">${poll.description}</p>
+                            <p style="margin-bottom: 20px;"><strong>Всего голосов: ${poll.totalVotes || 0}</strong></p>
+                            <div id="results-container-${poll.id}"></div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                // Добавляем обработчики для закрытия
+                modal.querySelector('.close').addEventListener('click', function() {
+                    modal.style.display = 'none';
+                });
+                
+                // Закрытие по клику на фон
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+                
+                // Отображаем результаты
+                const resultsContainer = document.getElementById(`results-container-${poll.id}`);
+                renderPollResults(poll, resultsContainer);
+            } else {
+                modal.style.display = 'flex';
+            }
+        }
+        
+        // Показать результаты в текущем разделе
+        function showResultsInCurrentSection(poll) {
+            const myPollsContainer = document.getElementById('my-polls-container');
+            myPollsContainer.innerHTML = '';
+            
+            // Создаем контейнер для результатов
+            const resultsContainer = document.createElement('div');
+            resultsContainer.className = 'poll-result-view';
+            
+            resultsContainer.innerHTML = `
+                <h3>${poll.title} - Результаты</h3>
+                <p style="margin-bottom: 15px; opacity: 0.8;">${poll.description}</p>
+                <p style="margin-bottom: 20px;"><strong>Всего голосов: ${poll.totalVotes || 0}</strong></p>
+                <div id="results-details-${poll.id}"></div>
+                <button class="btn btn-secondary" id="backToPollsListBtn" style="margin-top: 20px;">
+                    <i class="fas fa-arrow-left"></i> Назад к списку опросов
+                </button>
+            `;
+            
+            myPollsContainer.appendChild(resultsContainer);
+            
+            // Отображаем результаты
+            const resultsDetails = document.getElementById(`results-details-${poll.id}`);
+            renderPollResults(poll, resultsDetails);
+            
+            // Обработчик кнопки "Назад"
+            document.getElementById('backToPollsListBtn').addEventListener('click', function() {
+                renderMyPolls();
+            });
+        }
+        
+        // Отобразить результаты опроса
+        function renderPollResults(poll, container) {
+            container.innerHTML = '';
+            
+            poll.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'poll-result-item';
+                
+                // Рассчитываем процент
+                let percentage = 0;
+                if (poll.totalVotes > 0) {
+                    percentage = Math.round((option.votes / poll.totalVotes) * 100);
+                }
+                
+                optionElement.innerHTML = `
+                    <div class="poll-result-label">
+                        <span>${option.text}</span>
+                        <span class="poll-result-percentage">${percentage}% (${option.votes} голосов)</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" style="width: ${percentage}%"></div>
+                    </div>
+                `;
+                
+                container.appendChild(optionElement);
+            });
+        }
+        
+        // Удаление опроса
+        function deletePoll(pollId) {
+            const pollIndex = polls.findIndex(p => p.id === pollId);
+            if (pollIndex !== -1) {
+                const poll = polls[pollIndex];
+                
+                // Добавление в историю
+                history.unshift({
+                    user: currentUser.email,
+                    type: 'delete',
+                    description: `Удален опрос: "${poll.title}"`,
+                    date: new Date().toLocaleString('ru-RU'),
+                    userName: currentUser.name
+                });
+                saveHistory();
+                
+                polls.splice(pollIndex, 1);
+                savePolls();
+                renderMyPolls();
+                renderPolls();
+                renderAvailablePolls();
+                alert('Опрос удален!');
+            }
+        }
+        
+        // Отображение доступных опросов для прохождения
+        function renderAvailablePolls() {
+            const availablePolls = document.getElementById('available-polls');
+            availablePolls.innerHTML = '';
+            availablePolls.style.display = 'grid';
+            document.getElementById('poll-view').style.display = 'none';
+            document.getElementById('poll-result').style.display = 'none';
+            
+            if (polls.length === 0) {
+                availablePolls.innerHTML = '<p>Нет доступных опросов.</p>';
+                return;
+            }
+            
+            polls.forEach(poll => {
+                const pollCard = document.createElement('div');
+                pollCard.className = 'poll-card';
+                pollCard.innerHTML = `
+                    <h3>${poll.title}</h3>
+                    <p>${poll.description}</p>
+                    <div class="poll-creator">Создатель: ${poll.creatorName || poll.creator}</div>
+                    <div class="poll-meta">
+                        <span><i class="fas fa-calendar"></i> ${poll.date}</span>
+                        <span><i class="fas fa-vote-yea"></i> ${poll.totalVotes || 0} голосов</span>
+                    </div>
+                    <div class='poll-actions'>
+                        <button class="btn btn-sm btn-primary take-poll-btn" data-id="${poll.id}">Пройти опрос</button>
+                    </div>
+                `;
+                availablePolls.appendChild(pollCard);
+            });
+            
+            // Добавление обработчиков для кнопок
+            document.querySelectorAll('.take-poll-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const pollId = parseInt(this.getAttribute('data-id'));
+                    takePoll(pollId);
+                });
+            });
+        }
+        
+        // Отображение истории
+        function renderHistory() {
+            const historyList = document.getElementById('history-list');
+            historyList.innerHTML = '';
+            
+            // Если история пуста, скрываем кнопку очистки
+            if (history.length === 0) {
+                historyList.innerHTML = '<p>История действий пуста.</p>';
+                document.getElementById('clearHistoryBtn').style.display = 'none';
+                return;
+            }
+            
+            // Показываем кнопку очистки
+            document.getElementById('clearHistoryBtn').style.display = 'block';
+            
+            // Фильтруем историю по текущему пользователю, если он не админ
+            let userHistory = history;
+            if (currentUser && currentUser.role !== 'admin') {
+                userHistory = history.filter(item => item.user === currentUser.email);
+            }
+            
+            if (userHistory.length === 0) {
+                historyList.innerHTML = '<p>История действий пуста.</p>';
+                document.getElementById('clearHistoryBtn').style.display = 'none';
+                return;
+            }
+            
+            userHistory.forEach(item => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                
+                let icon = '';
+                switch(item.type) {
+                    case 'vote':
+                        icon = '<i class="fas fa-vote-yea"></i>';
+                        break;
+                    case 'create':
+                        icon = '<i class="fas fa-plus-circle"></i>';
+                        break;
+                    case 'delete':
+                        icon = '<i class="fas fa-trash"></i>';
+                        break;
+                    case 'login':
+                        icon = '<i class="fas fa-sign-in-alt"></i>';
+                        break;
+                    case 'register':
+                        icon = '<i class="fas fa-user-plus"></i>';
+                        break;
+                    case 'logout':
+                        icon = '<i class="fas fa-sign-out-alt"></i>';
+                        break;
+                    case 'profile_update':
+                        icon = '<i class="fas fa-user-edit"></i>';
+                        break;
+                    case 'role_change':
+                        icon = '<i class="fas fa-shield-alt"></i>';
+                        break;
+                    default:
+                        icon = '<i class="fas fa-history"></i>';
+                }
+                
+                historyItem.innerHTML = `
+                    <div>${icon} ${item.description}</div>
+                    <div>${item.date} ${item.userName ? `- ${item.userName}` : ''}</div>
+                `;
+                historyList.appendChild(historyItem);
+            });
+        }
+        
+        // Прохождение опроса
+        function takePoll(pollId) {
+            const poll = polls.find(p => p.id === pollId);
+            if (!poll) return;
+            
+            // Прячем список опросов и показываем форму опроса
+            document.getElementById('available-polls').style.display = 'none';
+            document.getElementById('poll-view').style.display = 'block';
+            document.getElementById('poll-result').style.display = 'none';
+            
+            document.getElementById('poll-view-title').textContent = poll.title;
+            document.getElementById('poll-view-description').textContent = poll.description;
+            
+            // Показываем кнопку отправки
+            document.getElementById('submitPollBtn').style.display = 'block';
+            
+            const optionsContainer = document.getElementById('poll-options-container');
+            optionsContainer.innerHTML = '';
+            
+            poll.options.forEach((option, index) => {
+                const optionElement = document.createElement('label');
+                optionElement.className = 'poll-option';
+                
+                if (poll.type === 'multiple') {
+                    optionElement.innerHTML = `
+                        <input type="checkbox" id="option-${pollId}-${index}" name="poll-option-${pollId}" value="${index}">
+                        <span class="custom-checkbox"></span>
+                        <span class="poll-option-text">${option.text}</span>
+                    `;
+                } else {
+                    optionElement.innerHTML = `
+                        <input type="radio" id="option-${pollId}-${index}" name="poll-option-${pollId}" value="${index}">
+                        <span class="custom-radio"></span>
+                        <span class="poll-option-text">${option.text}</span>
+                    `;
+                }
+                
+                // Добавляем обработчик клика на всю область варианта
+                optionElement.addEventListener('click', function(e) {
+                    const input = this.querySelector('input');
+                    if (poll.type === 'multiple') {
+                        input.checked = !input.checked;
+                        this.classList.toggle('selected', input.checked);
+                    } else {
+                        // Для радио-кнопок убираем выделение у всех
+                        document.querySelectorAll(`input[name="poll-option-${pollId}"]`).forEach(inp => {
+                            inp.parentElement.classList.remove('selected');
+                        });
+                        input.checked = true;
+                        this.classList.add('selected');
+                    }
+                    
+                    // Триггерим событие изменения для input
+                    input.dispatchEvent(new Event('change'));
+                });
+                
+                // Синхронизируем выделение с состоянием input
+                optionElement.addEventListener('change', function(e) {
+                    const input = this.querySelector('input');
+                    if (poll.type === 'multiple') {
+                        this.classList.toggle('selected', input.checked);
+                    } else if (input.checked) {
+                        this.classList.add('selected');
+                    }
+                });
+                
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            currentPollId = pollId;
+        }
+        
+        // Отправка ответа на опрос
+        function submitPollResponse() {
+            if (currentPollId === null) return;
+            
+            const poll = polls.find(p => p.id === currentPollId);
+            if (!poll) return;
+            
+            const selectedOptions = [];
+            
+            if (poll.type === 'multiple') {
+                document.querySelectorAll(`input[name="poll-option-${poll.id}"]:checked`).forEach(checkbox => {
+                    selectedOptions.push(parseInt(checkbox.value));
+                });
+            } else {
+                const selected = document.querySelector(`input[name="poll-option-${poll.id}"]:checked`);
+                if (selected) {
+                    selectedOptions.push(parseInt(selected.value));
+                }
+            }
+            
+            if (selectedOptions.length === 0) {
+                alert('Пожалуйста, выберите хотя бы один вариант ответа');
+                return;
+            }
+            
+            // Обновление результатов
+            selectedOptions.forEach(index => {
+                poll.options[index].votes++;
+            });
+            
+            poll.totalVotes = poll.options.reduce((sum, option) => sum + option.votes, 0);
+            savePolls();
+            
+            // Добавление в историю
+            history.unshift({
+                user: currentUser ? currentUser.email : 'Гость',
+                type: 'vote',
+                description: `Пройден опрос: "${poll.title}"`,
+                date: new Date().toLocaleString('ru-RU'),
+                userName: currentUser ? currentUser.name : 'Гость'
+            });
+            saveHistory();
+            
+            // Показываем результат
+            showPollResult();
+        }
+        
+        // Показ результата после голосования
+        function showPollResult() {
+            const poll = polls.find(p => p.id === currentPollId);
+            if (!poll) return;
+            
+            document.getElementById('poll-view').style.display = 'none';
+            document.getElementById('poll-result').style.display = 'block';
+        }
+        
+        // Авторизация пользователя
+        function loginUser() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                alert('Пожалуйста, заполните все поля');
+                return;
+            }
+            
+            const user = users.find(u => u.email === email && u.password === password);
+            
+            if (user) {
+                currentUser = {
+                    id: user.id,
+                    email: user.email,
+                    name: user.name,
+                    avatar: user.avatar,
+                    avatarImage: user.avatarImage || '',
+                    role: user.role
+                };
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                document.getElementById('loginModal').style.display = 'none';
+                updateUserInfo();
+                renderPolls();
+                alert(`Добро пожаловать, ${user.name}!`);
+                
+                // Добавление в историю
+                history.unshift({
+                    user: currentUser.email,
+                    type: 'login',
+                    description: `Пользователь вошел в систему`,
+                    date: new Date().toLocaleString('ru-RU'),
+                    userName: currentUser.name
+                });
+                saveHistory();
+            } else {
+                alert('Неверный email или пароль');
+            }
+        }
+        
+        // Регистрация пользователя
+        function registerUser() {
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
+            
+            // Очистка сообщений об ошибках
+            document.getElementById('registerNameError').textContent = '';
+            document.getElementById('registerEmailError').textContent = '';
+            document.getElementById('registerPasswordError').textContent = '';
+            
+            if (!name || !email || !password || !passwordConfirm) {
+                alert('Пожалуйста, заполните все поля');
+                return;
+            }
+            
+            if (name.length < 2) {
+                document.getElementById('registerNameError').textContent = 'Имя должно содержать минимум 2 символа';
+                return;
+            }
+            
+            if (name.length > 30) {
+                document.getElementById('registerNameError').textContent = 'Имя не должно превышать 30 символов';
+                return;
+            }
+            
+            // Проверка email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                document.getElementById('registerEmailError').textContent = 'Введите корректный email адрес';
+                return;
+            }
+            
+            if (password.length < 6) {
+                document.getElementById('registerPasswordError').textContent = 'Пароль должен содержать минимум 6 символов';
+                return;
+            }
+            
+            if (password !== passwordConfirm) {
+                document.getElementById('registerPasswordError').textContent = 'Пароли не совпадают';
+                return;
+            }
+            
+            if (users.find(u => u.email === email)) {
+                alert('Пользователь с таким email уже существует');
+                return;
+            }
+            
+            const newUser = {
+                id: users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1,
+                name,
+                email,
+                password,
+                role: 'user',
+                avatar: 'U',
+                avatarImage: '',
+                registrationDate: new Date().toLocaleDateString('ru-RU')
+            };
+            
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            currentUser = {
+                id: newUser.id,
+                email: newUser.email,
+                name: newUser.name,
+                avatar: newUser.avatar,
+                avatarImage: newUser.avatarImage,
+                role: newUser.role
+            };
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            document.getElementById('registerModal').style.display = 'none';
+            updateUserInfo();
+            renderPolls();
+            
+            // Добавление в историю
+            history.unshift({
+                user: currentUser.email,
+                type: 'register',
+                description: `Зарегистрирован новый пользователь: ${name}`,
+                date: new Date().toLocaleString('ru-RU'),
+                userName: currentUser.name
+            });
+            saveHistory();
+            
+            alert('Регистрация прошла успешно! Добро пожаловать!');
+        }
+        
+        // Выход пользователя
+        function logoutUser() {
+            // Добавление в историю
+            if (currentUser && !currentUser.isGuest) {
+                history.unshift({
+                    user: currentUser.email,
+                    type: 'logout',
+                    description: `Пользователь вышел из системы`,
+                    date: new Date().toLocaleString('ru-RU'),
+                    userName: currentUser.name
+                });
+                saveHistory();
+            }
+            
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            document.getElementById('loginModal').style.display = 'flex';
+            updateUserInfo();
+        }
+        
+        // Обновление информации о пользователе
+        function updateUserInfo() {
+            if (currentUser) {
+                document.getElementById('userName').textContent = currentUser.name;
+                
+                // Отображаем аватар (изображение или букву)
+                const avatarElement = document.getElementById('userAvatar');
+                if (currentUser.avatarImage) {
+                    avatarElement.style.backgroundImage = `url(${currentUser.avatarImage})`;
+                    avatarElement.textContent = '';
+                } else {
+                    avatarElement.style.backgroundImage = 'none';
+                    avatarElement.textContent = currentUser.avatar;
+                    avatarElement.style.backgroundColor = getAvatarColor(currentUser.avatar);
+                }
+                
+                // Показываем/скрываем кнопки в зависимости от типа пользователя
+                if (currentUser.isGuest) {
+                    // Гость - показываем кнопку "Войти" и скрываем остальные
+                    document.getElementById('logoutBtn').style.display = 'none';
+                    document.getElementById('loginFromGuestBtn').style.display = 'inline-block';
+                    document.getElementById('guestModeBtn').style.display = 'none';
+                } else {
+                    // Зарегистрированный пользователь - показываем кнопку "Выйти"
+                    document.getElementById('logoutBtn').style.display = 'inline-block';
+                    document.getElementById('loginFromGuestBtn').style.display = 'none';
+                    document.getElementById('guestModeBtn').style.display = 'none';
+                }
+                
+                // Показываем/скрываем админ-панель
+                if (currentUser.role === 'admin') {
+                    document.getElementById('admin-nav-item').style.display = 'block';
+                    document.getElementById('admin-side-item').style.display = 'block';
+                } else {
+                    document.getElementById('admin-nav-item').style.display = 'none';
+                    document.getElementById('admin-side-item').style.display = 'none';
+                }
+            } else {
+                // Неавторизованный пользователь - показываем кнопку "Гостевой режим"
+                document.getElementById('userName').textContent = 'Гость';
+                document.getElementById('userAvatar').textContent = 'G';
+                document.getElementById('userAvatar').style.backgroundColor = '#6c757d';
+                document.getElementById('userAvatar').style.backgroundImage = 'none';
+                document.getElementById('logoutBtn').style.display = 'none';
+                document.getElementById('loginFromGuestBtn').style.display = 'none';
+                document.getElementById('guestModeBtn').style.display = 'inline-block';
+            }
+        }
+        
+        // Получение цвета для аватара
+        function getAvatarColor(avatar) {
+            switch(avatar) {
+                case 'A': return '#6a11cb';
+                case 'M': return '#28a745';
+                case 'P': return '#ffc107';
+                case 'G': return '#6c757d';
+                default: return '#2575fc';
+            }
+        }
+        
+        // Сохранение настроек
+        function saveSettings() {
+            const theme = document.getElementById('themeSwitch').checked ? 'dark' : 'light';
+            const emailNotifications = document.getElementById('emailNotifications').checked;
+            const browserNotifications = document.getElementById('browserNotifications').checked;
+            
+            const settings = {
+                theme,
+                emailNotifications,
+                browserNotifications
+            };
+            
+            localStorage.setItem('settings', JSON.stringify(settings));
+            
+            // Обновляем цвет текста в подвале
+            updateFooterColor();
+            
+            alert('Настройки сохранены!');
+        }
+        
+        // Загрузка настроек
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem('settings')) || {
+                theme: 'light',
+                emailNotifications: true,
+                browserNotifications: true
+            };
+            
+            document.getElementById('themeSwitch').checked = settings.theme === 'dark';
+            document.getElementById('emailNotifications').checked = settings.emailNotifications;
+            document.getElementById('browserNotifications').checked = settings.browserNotifications;
+            
+            // Применяем тему
+            if (settings.theme === 'dark') {
+                document.body.classList.add('dark-theme');
+            } else {
+                document.body.classList.remove('dark-theme');
+            }
+            
+            // Обновляем цвет текста в подвале
+            updateFooterColor();
+        }
+        
+        // Обновление цвета текста в подвале
+        function updateFooterColor() {
+            const footer = document.querySelector('footer');
+            const isDarkTheme = document.body.classList.contains('dark-theme');
+            footer.style.color = isDarkTheme ? '#f0f0f0' : '#333';
+        }
+        
+        // Переключение темы
+        function toggleTheme() {
+            if (document.getElementById('themeSwitch').checked) {
+                document.body.classList.add('dark-theme');
+            } else {
+                document.body.classList.remove('dark-theme');
+            }
+            
+            // Обновляем цвет текста в подвале
+            updateFooterColor();
+        }
+        
+        // Загрузка данных профиля
+        function loadProfileData() {
+            if (!currentUser || currentUser.isGuest) return;
+            
+            document.getElementById('userNameInput').value = currentUser.name;
+            document.getElementById('userEmail').value = currentUser.email;
+            
+            // Отображаем аватар
+            const avatarPreview = document.getElementById('avatarPreview');
+            if (currentUser.avatarImage) {
+                avatarPreview.src = currentUser.avatarImage;
+            } else {
+                avatarPreview.src = '';
+                avatarPreview.style.backgroundColor = getAvatarColor(currentUser.avatar);
+                avatarPreview.style.display = 'flex';
+                avatarPreview.style.alignItems = 'center';
+                avatarPreview.style.justifyContent = 'center';
+                avatarPreview.style.color = 'white';
+                avatarPreview.style.fontWeight = 'bold';
+                avatarPreview.style.fontSize = '24px';
+                avatarPreview.textContent = currentUser.avatar;
+            }
+            
+            // Обновляем статистику
+            const userPolls = polls.filter(poll => poll.creator === currentUser.email);
+            const completedPolls = history.filter(item => item.type === 'vote' && item.user === currentUser.email).length;
+            
+            document.getElementById('createdPollsCount').textContent = userPolls.length;
+            document.getElementById('completedPollsCount').textContent = completedPolls;
+            
+            // Обновляем прогресс-бары
+            document.querySelector('#createdPollsCount').closest('.result-item').querySelector('.progress-bar').style.width = 
+                userPolls.length > 0 ? Math.min(userPolls.length * 10, 100) + '%' : '0%';
+                
+            document.querySelector('#completedPollsCount').closest('.result-item').querySelector('.progress-bar').style.width = 
+                completedPolls > 0 ? Math.min(completedPolls * 5, 100) + '%' : '0%';
+        }
+        
+        // Сохранение профиля
+        function saveProfile() {
+            if (!currentUser || currentUser.isGuest) return;
+            
+            const name = document.getElementById('userNameInput').value;
+            const avatarPreview = document.getElementById('avatarPreview');
+            const avatarImage = avatarPreview.src;
+            
+            if (!name) {
+                alert('Пожалуйста, введите имя пользователя');
+                return;
+            }
+            
+            if (name.length < 2) {
+                document.getElementById('nameError').textContent = 'Имя должно содержать минимум 2 символа';
+                return;
+            }
+            
+            if (name.length > 30) {
+                document.getElementById('nameError').textContent = 'Имя не должно превышать 30 символов';
+                return;
+            }
+            
+            // Обновляем текущего пользователя
+            currentUser.name = name;
+            currentUser.avatarImage = avatarImage;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            // Обновляем в списке пользователей
+            const userIndex = users.findIndex(u => u.id === currentUser.id);
+            if (userIndex !== -1) {
+                users[userIndex].name = name;
+                users[userIndex].avatarImage = avatarImage;
+                localStorage.setItem('users', JSON.stringify(users));
+            }
+            
+            updateUserInfo();
+            
+            // Добавление в историю
+            history.unshift({
+                user: currentUser.email,
+                type: 'profile_update',
+                description: `Пользователь обновил профиль`,
+                date: new Date().toLocaleString('ru-RU'),
+                userName: currentUser.name
+            });
+            saveHistory();
+            
+            alert('Профиль успешно обновлен!');
+        }
+        
+        // Создание нового опроса
+        function createNewPoll() {
+            if (currentUser && currentUser.isGuest) {
+                alert('Гости не могут создавать опросы. Пожалуйста, зарегистрируйтесь.');
+                return;
+            }
+            
+            const title = document.getElementById('pollTitle').value;
+            const description = document.getElementById('pollDescription').value;
+            const type = document.getElementById('pollSettings').value;
+            
+            if (!title) {
+                alert('Пожалуйста, введите название опроса');
+                return;
+            }
+            
+            const optionInputs = document.querySelectorAll('.option-input-field');
+            const options = [];
+            
+            optionInputs.forEach(input => {
+                if (input.value.trim()) {
+                    options.push({ text: input.value.trim(), votes: 0 });
+                }
+            });
+            
+            if (options.length < 2) {
+                alert('Добавьте как минимум два варианта ответа');
+                return;
+            }
+            
+            const newPoll = {
+                id: polls.length > 0 ? Math.max(...polls.map(p => p.id)) + 1 : 1,
+                title,
+                description,
+                options,
+                date: new Date().toLocaleDateString('ru-RU'),
+                totalVotes: 0,
+                type,
+                creator: currentUser.email,
+                creatorName: currentUser.name
+            };
+            
+            polls.push(newPoll);
+            savePolls();
+            
+            // Добавление в историю
+            history.unshift({
+                user: currentUser.email,
+                type: 'create',
+                description: `Создан опрос: "${title}"`,
+                date: new Date().toLocaleString('ru-RU'),
+                userName: currentUser.name
+            });
+            saveHistory();
+            
+            // Очистка формы
+            document.getElementById('pollTitle').value = '';
+            document.getElementById('pollDescription').value = '';
+            document.getElementById('poll-options').innerHTML = `
+                <div class="option-input">
+                    <input type="text" class="form-control option-input-field" placeholder="Вариант ответа">
+                    <button class="btn btn-danger btn-sm remove-option-btn"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="option-input">
+                    <input type="text" class="form-control option-input-field" placeholder="Вариант ответа">
+                    <button class="btn btn-danger btn-sm remove-option-btn"><i class="fas fa-times"></i></button>
+                </div>
+            `;
+            
+            // Добавляем обработчики для кнопок удаления
+            document.querySelectorAll('.remove-option-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.parentElement.remove();
+                });
+            });
+            
+            alert('Опрос успешно создан!');
+            showSection('overview');
+            renderPolls();
+        }
+        
+        // Отображение таблицы пользователей
+        function renderUsersTable() {
+            if (!currentUser || currentUser.role !== 'admin') return;
+            
+            const usersTableBody = document.getElementById('users-table-body');
+            usersTableBody.innerHTML = '';
+            
+            users.forEach(user => {
+                const userRow = document.createElement('tr');
+                userRow.innerHTML = `
+                    <td>${user.name}</td>
+                    <td>${user.email}</td>
+                    <td>
+                        <span class="role-badge ${user.role === 'admin' ? 'role-admin' : 'role-user'}">
+                            ${user.role === 'admin' ? 'Админ' : 'Пользователь'}
+                        </span>
+                    </td>
+                    <td>${user.registrationDate}</td>
+                    <td>
+                        ${user.id !== currentUser.id ? `
+                            <button class="btn btn-sm ${user.role === 'admin' ? 'btn-warning' : 'btn-success'} change-role-btn" data-id="${user.id}">
+                                ${user.role === 'admin' ? 'Сделать пользователем' : 'Сделать админом'}
+                            </button>
+                        ` : ''}
+                    </td>
+                `;
+                usersTableBody.appendChild(userRow);
+            });
+            
+            // Добавляем обработчики для кнопок изменения роли
+            document.querySelectorAll('.change-role-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = parseInt(this.getAttribute('data-id'));
+                    changeUserRole(userId);
+                });
+            });
+        }
+        
+        // Изменение роли пользователя
+        function changeUserRole(userId) {
+            const user = users.find(u => u.id === userId);
+            if (!user) return;
+            
+            user.role = user.role === 'admin' ? 'user' : 'admin';
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            // Обновляем текущего пользователя, если это он
+            if (currentUser && currentUser.id === userId) {
+                currentUser.role = user.role;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                updateUserInfo();
+            }
+            
+            renderUsersTable();
+            
+            // Добавление в историю
+            history.unshift({
+                user: currentUser.email,
+                type: 'role_change',
+                description: `Роль пользователя ${user.name} изменена на ${user.role === 'admin' ? 'администратор' : 'пользователь'}`,
+                date: new Date().toLocaleString('ru-RU'),
+                userName: currentUser.name
+            });
+            saveHistory();
+            
+            alert('Роль пользователя изменена!');
+        }
+    </script>
+</body>
+</html>
